@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handwritten Text Recognition</title>
+    <style>
+        /* General Body Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(to right, #6a11cb, #2575fc); /* Gradient Background */
+        }
+
+        /* Centered Container Styling */
+        .container {
+            text-align: center;
+            max-width: 500px;
+            padding: 30px;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Title Styling */
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        /* Button Styling */
+        .upload-btn, .predict-btn {
+            margin-top: 15px;
+            padding: 12px 30px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            outline: none;
+        }
+
+        /* Hover Effects */
+        .upload-btn:hover, .predict-btn:hover {
+            background-color: #0056b3;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        }
+
+        /* Image Preview Styling */
+        .image-preview-container {
+            position: relative;
+            display: inline-block;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            max-width: 100%;
+        }
+
+        /* Image Preview Sizing */
+        .image-preview {
+            max-width: 100%;
+            max-height: 200px;
+        }
+
+        /* Remove Button Styling */
+        .remove-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: rgba(220, 53, 69, 0.85);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            font-size: 16px;
+            line-height: 20px;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Hover Effect for Remove Button */
+        .remove-btn:hover {
+            background-color: #c82333;
+        }
+
+        /* Output Display Styling */
+        #output {
+            margin-top: 20px;
+            padding: 15px;
+            font-size: 18px;
+            color: #555;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Hide File Input */
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Label for File Input */
+        label {
+            cursor: pointer;
+        }
+
+        /* Center the Predict Button */
+        .predict-btn-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Handwritten Text Recognition</h1>
+
+        <!-- File Upload Form -->
+        <form id="upload-form" enctype="multipart/form-data">
+            <label for="image-upload" class="upload-btn">Upload Image</label>
+            <input type="file" id="image-upload" name="image" accept="image/*" onchange="showImageAndProcess(this)">
+
+            <!-- Image Preview and Remove Button -->
+            <div id="image-preview-container" class="image-preview-container" style="display: none;">
+                <button type="button" class="remove-btn" onclick="removeImage()">×</button>
+                <img id="image-preview" class="image-preview" alt="Uploaded Image Preview">
+            </div>
+
+            <!-- Centered Predict Button -->
+            <div class="predict-btn-container" style="display: none;">
+                <button type="button" id="predict-btn" class="predict-btn" onclick="predictText()">Predict</button>
+            </div>
+        </form>
+
+        <!-- Output Display -->
+        <div id="output">
+            Output will be displayed here.
+        </div>
+    </div>
+
+    <script>
+        function showImageAndProcess(input) {
+            const outputDiv = document.getElementById("output");
+            const imagePreview = document.getElementById("image-preview");
+            const previewContainer = document.getElementById("image-preview-container");
+            const predictBtnContainer = document.querySelector(".predict-btn-container");
+
+            outputDiv.innerHTML = "Output will be displayed here.";
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    imagePreview.src = e.target.result;
+                    previewContainer.style.display = "inline-block";
+                    predictBtnContainer.style.display = "flex";
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function removeImage() {
+            const imagePreview = document.getElementById("image-preview");
+            const previewContainer = document.getElementById("image-preview-container");
+            const fileInput = document.getElementById("image-upload");
+            const outputDiv = document.getElementById("output");
+            const predictBtnContainer = document.querySelector(".predict-btn-container");
+
+            imagePreview.src = "";
+            previewContainer.style.display = "none";
+            fileInput.value = "";
+            outputDiv.innerHTML = "Output will be displayed here.";
+            predictBtnContainer.style.display = "none";
+        }
+
+        // Reset the form on page load
+        window.onload = function() {
+            document.getElementById("output").innerHTML = "Output will be displayed here.";
+            document.getElementById("image-preview-container").style.display = "none";
+            document.querySelector(".predict-btn-container").style.display = "none";
+            document.getElementById("image-upload").value = "";
+        };
+
+        // AJAX function for prediction
+        function predictText() {
+            const form = document.getElementById("upload-form");
+            const formData = new FormData(form);
+
+            fetch("/", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())  // JSON response
+            .then(data => {
+                document.getElementById("output").innerHTML = data.predicted_text;  // Displays only predicted text
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById("output").innerHTML = "An error occurred.";
+            });
+        }
+    </script>
+</body>
+</html>
